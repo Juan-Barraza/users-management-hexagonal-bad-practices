@@ -121,10 +121,6 @@ public final class EmailNotificationService {
     try {
       emailSenderPort.send(destination);
     } catch (final EmailSenderException senderException) {
-      log.log(
-          Level.WARNING,
-          "[EmailNotificationService] No se pudo enviar correo a: {0}. Causa: {1}",
-          new Object[] {destination.getDestinationEmail(), senderException.getMessage()});
       throw senderException;
     }
   }
