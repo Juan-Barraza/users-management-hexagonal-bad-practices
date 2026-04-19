@@ -5,7 +5,8 @@ import com.jcaa.usersmanagement.domain.exception.InvalidUserRoleException;
 public enum UserRole {
   ADMIN,
   MEMBER,
-  REVIEWER;
+  REVIEWER,
+  UNKNOWN;
 
   public static UserRole fromString(final String value) {
     for (final UserRole role : values()) {

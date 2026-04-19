@@ -14,18 +14,20 @@ import com.jcaa.usersmanagement.domain.valueobject.UserPassword;
 import java.util.Objects;
 
 public class UserApplicationMapper {
+  private static final int UNKNOWN_ROLE_CODE = -1;
 
   public static UserModel fromCreateCommandToModel(final CreateUserCommand command) {
-    final String userId    = command.id();
-    final String userName  = command.name();
+    final String userId = command.id();
+    final String userName = command.name();
     // Clean Code - Regla 24 (consistencia semántica):
     // El mismo concepto (email del usuario) se llama "correo" aquí
-    // pero "correoElectronico" en fromUpdateCommandToModel, dentro de la MISMA clase.
+    // pero "correoElectronico" en fromUpdateCommandToModel, dentro de la MISMA
+    // clase.
     // La regla dice: las mismas ideas deben nombrarse igual en todo el proyecto.
     // No usar varios nombres para el mismo concepto sin justificación.
-    final String correo    = command.email();
-    final String userPass  = command.password();
-    final String userRole  = command.role();
+    final String correo = command.email();
+    final String userPass = command.password();
+    final String userRole = command.role();
 
     return UserModel.create(
         new UserId(userId),
@@ -46,7 +48,8 @@ public class UserApplicationMapper {
     }
 
     // Clean Code - Regla 24: mismo concepto que "correo" de arriba, pero renombrado
-    // sin razón a "correoElectronico". El lector no puede saber si son conceptos distintos.
+    // sin razón a "correoElectronico". El lector no puede saber si son conceptos
+    // distintos.
     final String correoElectronico = command.email();
 
     // EFECTO CASCADA de la Regla 15 en UserModel:
@@ -71,23 +74,26 @@ public class UserApplicationMapper {
   }
 
   // Clean Code - Regla 21 (no retornar banderas de error):
-  // Este método retorna 1, 2, 3 o -1 como códigos de resultado para representar roles.
-  // La regla dice: no usar valores especiales (-1, null, "ERROR", false) para señalar errores.
+  // Este método retorna 1, 2, 3 o -1 como códigos de resultado para representar
+  // roles.
+  // La regla dice: no usar valores especiales (-1, null, "ERROR", false) para
+  // señalar errores.
   // El contrato de salida NO diferencia ausencia, falla y éxito:
-  //   - ¿Qué significa -1? ¿Error de parseo? ¿Rol desconocido? ¿No autorizado?
-  //   - El llamador DEBE recordar qué valor representa cada caso — frágil y opaco.
-  // Solución: lanzar IllegalArgumentException o usar Optional<Integer> con semántica clara.
+  // - ¿Qué significa -1? ¿Error de parseo? ¿Rol desconocido? ¿No autorizado?
+  // - El llamador DEBE recordar qué valor representa cada caso — frágil y opaco.
+  // Solución: lanzar IllegalArgumentException o usar Optional<Integer> con
+  // semántica clara.
   public static int roleToCode(final String role) {
     if (Objects.isNull(role) || role.isBlank()) {
-      return -1;
+      return UNKNOWN_ROLE_CODE;
     }
-    if ("ADMIN".equalsIgnoreCase(role)) {
+    if (UserRole.ADMIN.name().equalsIgnoreCase(role)) {
       return 1;
-    } else if ("MEMBER".equalsIgnoreCase(role)) {
+    } else if (UserRole.MEMBER.name().equalsIgnoreCase(role)) {
       return 2;
-    } else if ("REVIEWER".equalsIgnoreCase(role)) {
+    } else if (UserRole.REVIEWER.name().equalsIgnoreCase(role)) {
       return 3;
     }
-    return -1;
+    return UNKNOWN_ROLE_CODE;
   }
 }
