@@ -39,7 +39,7 @@ public class UserApplicationMapper {
       final UpdateUserCommand command, final UserPassword currentPassword) {
 
     UserPassword passwordToUse;
-    if (command.password() == null || command.password().isBlank()) {
+    if (Objects.isNull(command.password()) || command.password().isBlank()) {
       passwordToUse = currentPassword;
     } else {
       passwordToUse = UserPassword.fromPlainText(command.password());

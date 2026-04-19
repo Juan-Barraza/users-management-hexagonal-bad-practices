@@ -2,6 +2,9 @@ package com.jcaa.usersmanagement.application.service;
 
 import com.jcaa.usersmanagement.domain.model.UserModel;
 import com.jcaa.usersmanagement.domain.enums.UserStatus;
+
+import java.util.Objects;
+
 import com.jcaa.usersmanagement.domain.enums.UserRole;
 
 /**
@@ -59,7 +62,7 @@ public class UserValidationUtils {
   // Clean Code - Regla 18 (magic numbers): el número 8 es un magic number aquí —
   // ya tiene significado en UserPassword pero se repite sin constante.
   public static boolean isValidPassword(final String password) {
-    return password != null && password.length() >= 8;
+    return !Objects.isNull(password) && password.length() >= 8;
   }
 
   // Clean Code - Regla 20 (objeto antes que primitivo cuando el concepto lo merezca):
@@ -76,7 +79,7 @@ public class UserValidationUtils {
       final String status,
       final int maxInactivityDays) {
     // Clean Code - Regla 17: condición larga y difícil de leer que debería extraerse.
-    if (userId == null || userId.isBlank() || email == null || !email.contains("@")) {
+    if (Objects.isNull(userId) || userId.isBlank() || Objects.isNull(email) || !email.contains("@")) {
       return false;
     }
     // Clean Code - Regla 18: "ACTIVE" y "PENDING" son literales mágicos —

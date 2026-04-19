@@ -12,6 +12,7 @@ import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 
+import java.util.Objects;
 import java.util.Set;
 
 @RequiredArgsConstructor
@@ -44,7 +45,7 @@ public final class LoginService implements LoginUseCase {
   private UserModel getAndValidateUser(final UserEmail email, final String plainPassword) {
     final UserModel user = getUserByEmailPort.getByEmail(email).orElse(null);
 
-    if (user == null) {
+    if (Objects.isNull(user)) {
       throw InvalidCredentialsException.becauseCredentialsAreInvalid();
     }
 
