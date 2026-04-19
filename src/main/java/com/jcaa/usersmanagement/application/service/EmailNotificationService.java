@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
-import java.util.logging.Level;
 
 @Log
 @RequiredArgsConstructor
@@ -81,7 +80,7 @@ public final class EmailNotificationService {
         user.getEmail().value(), user.getName().value(), subject, body);
   }
 
-  private String loadTemplate(final String templateName) {
+  private static String loadTemplate(final String templateName) {
     final String path = "/templates/" + templateName;
     try (InputStream inputStream = openResourceStream(path)) {
       if (Objects.isNull(inputStream)) {
@@ -94,8 +93,8 @@ public final class EmailNotificationService {
     }
   }
 
-  InputStream openResourceStream(final String path) {
-    return getClass().getResourceAsStream(path);
+  static InputStream openResourceStream(final String path) {
+    return EmailNotificationService.class.getResourceAsStream(path);
   }
 
   // VIOLACIÓN Regla 4: método privado que no usa estado de instancia (no usa this ni campos)
