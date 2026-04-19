@@ -54,7 +54,7 @@ public class UserValidationUtils {
   // Clean Code - Regla 23: el conocimiento de qué es un email válido está disperso
   // entre UserEmail, UserValidationUtils y potencialmente otras clases.
   public static boolean isValidEmail(final String email) {
-    if (email == null || email.isBlank()) {
+    if (Objects.isNull(email) || email.isBlank()) {
       return false;
     }
     return email.contains("@") && email.contains(".");
