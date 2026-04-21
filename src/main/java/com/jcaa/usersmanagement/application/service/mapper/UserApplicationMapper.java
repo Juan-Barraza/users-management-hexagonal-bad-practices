@@ -83,17 +83,11 @@ public class UserApplicationMapper {
   // - El llamador DEBE recordar qué valor representa cada caso — frágil y opaco.
   // Solución: lanzar IllegalArgumentException o usar Optional<Integer> con
   // semántica clara.
-  public static int roleToCode(final String role) {
-    if (Objects.isNull(role) || role.isBlank()) {
+  public static int roleToCode(final String roleName) {
+    try {
+      return UserRole.fromString(roleName).getCode();
+    } catch (Exception e) {
       return UNKNOWN_ROLE_CODE;
     }
-    if (UserRole.ADMIN.name().equalsIgnoreCase(role)) {
-      return 1;
-    } else if (UserRole.MEMBER.name().equalsIgnoreCase(role)) {
-      return 2;
-    } else if (UserRole.REVIEWER.name().equalsIgnoreCase(role)) {
-      return 3;
-    }
-    return UNKNOWN_ROLE_CODE;
   }
 }

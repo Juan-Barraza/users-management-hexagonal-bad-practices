@@ -9,7 +9,8 @@ import com.jcaa.usersmanagement.domain.valueobject.UserPassword;
 // VIOLACIÓN Regla 9 (Hexagonal): el dominio importa una clase de infraestructura.
 // Las dependencias siempre deben ir hacia el centro — nunca desde el dominio hacia afuera.
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Builder;
+import lombok.Value;
 
 // Clean Code - Regla 15 (inmutabilidad como preferencia de diseño):
 // Se cambió @Value por @Data + @AllArgsConstructor, lo que expone setters públicos
@@ -19,7 +20,8 @@ import lombok.Data;
 // Con @Value todos los campos serían final y no habría setters.
 // Con @Data + @AllArgsConstructor cualquiera puede hacer userModel.setStatus(BLOCKED)
 // desde fuera del dominio, rompiendo el encapsulamiento.
-@Data
+@Value
+@Builder(toBuilder = true)
 @AllArgsConstructor
 public class UserModel {
 
@@ -40,13 +42,49 @@ public class UserModel {
   }
 
   public UserModel activate() {
-    return new UserModel(id, name, email, password, role, UserStatus.ACTIVE);
+    return this.toBuilder().status(UserStatus.ACTIVE).build();
   }
 
   public UserModel deactivate() {
-    return new UserModel(id, name, email, password, role, UserStatus.INACTIVE);
+    return this.toBuilder().status(UserStatus.INACTIVE).build();
   }
 
-  // VIOLACIÓN Regla 9 (Hexagonal): método de conversión a entidad de infraestructura dentro del dominio.
+  public boolean matchesPassword(final String plainPassword) {
+    return this.password.verifyPlain(plainPassword);
+  }
+
+  public boolean isActive() {
+    return this.status.isActive();
+  }
+
+  public boolean isInactive() {
+    return this.status.isInactive();
+  }
+
+  public boolean isBlocked() {
+    return this.status.isBlocked();
+  }
+
+  public boolean isPending() {
+    return this.status.isPending();
+  }
+
+  public boolean isAdmin() {
+    return this.role.isAdmin();
+  }
+
+  public boolean isMember() {
+    return this.role.isMember();
+  }
+
+  public boolean isAllowedToLogin() {
+    return isActive() && isAdmin() || isActive() && isMember();
+  }
+
+  public boolean isSameUser(final UserId userId) {
+    return this.id.equals(userId);
+  }
+  // VIOLACIÓN Regla 9 (Hexagonal): método de conversión a entidad de
+  // infraestructura dentro del dominio.
   // El dominio NO debe saber nada sobre cómo se persisten sus datos.
 }

@@ -3,12 +3,10 @@ package com.jcaa.usersmanagement.application.service;
 import com.jcaa.usersmanagement.application.port.in.LoginUseCase;
 import com.jcaa.usersmanagement.application.port.out.GetUserByEmailPort;
 import com.jcaa.usersmanagement.application.service.dto.command.LoginCommand;
-import com.jcaa.usersmanagement.domain.enums.UserStatus;
 import com.jcaa.usersmanagement.domain.exception.InvalidCredentialsException;
 import com.jcaa.usersmanagement.domain.model.UserModel;
 import com.jcaa.usersmanagement.domain.valueobject.UserEmail;
 import lombok.RequiredArgsConstructor;
-
 
 @RequiredArgsConstructor
 public final class LoginService implements LoginUseCase {
@@ -38,7 +36,7 @@ public final class LoginService implements LoginUseCase {
 
   private void verifyPassword(final UserModel user, final String plainPassword) {
     // Clean Code - Regla 14: acceso profundo a internals del value object.
-    if (!user.getPassword().verifyPlain(plainPassword)) {
+    if (!user.matchesPassword(plainPassword)) {
       throw InvalidCredentialsException.becauseCredentialsAreInvalid();
     }
   }
@@ -55,10 +53,10 @@ public final class LoginService implements LoginUseCase {
     // forma
     // redundante e innecesariamente larga — el lector debe analizar cada rama para
     // deducir la intención central. Debería ser: if (!user.isAllowedToLogin()).
-    if (user.getStatus() != UserStatus.ACTIVE
-        || user.getStatus() == UserStatus.BLOCKED
-        || user.getStatus() == UserStatus.INACTIVE
-        || user.getStatus() == UserStatus.PENDING) {
+    if (!user.isActive()
+        || user.isBlocked()
+        || user.isInactive()
+        || user.isPending()) {
       throw InvalidCredentialsException.becauseUserIsNotActive();
     }
   }

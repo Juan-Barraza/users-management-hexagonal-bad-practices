@@ -91,7 +91,7 @@ public final class UpdateUserService implements UpdateUserUseCase {
     // se está evaluando ni por qué hay lógica redundante en la segunda mitad del
     // OR.
     getUserByEmailPort.getByEmail(newEmail).ifPresent(userWithSameEmail -> {
-      if (!userWithSameEmail.getId().equals(ownerId)) {
+      if (!userWithSameEmail.isSameUser(ownerId)) {
         throw UserAlreadyExistsException.becauseEmailAlreadyExists(newEmail.value());
       }
     });

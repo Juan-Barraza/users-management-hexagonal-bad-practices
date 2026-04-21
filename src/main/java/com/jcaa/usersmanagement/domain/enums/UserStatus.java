@@ -16,4 +16,20 @@ public enum UserStatus {
     }
     throw InvalidUserStatusException.becauseValueIsInvalid(value);
   }
+
+  public boolean isActive() {
+    return this == ACTIVE;
+  }
+
+  public boolean isPending() {
+    return this == PENDING;
+  }
+
+  public boolean isBlocked() {
+    return this == BLOCKED;
+  }
+
+  public boolean isInactive() {
+    return this == INACTIVE;
+  }
 }
