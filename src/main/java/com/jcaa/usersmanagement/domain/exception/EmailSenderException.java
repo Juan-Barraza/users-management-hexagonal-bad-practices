@@ -5,11 +5,11 @@ public final class EmailSenderException extends DomainException {
   private static final String ERROR_SMTP_FAILED = "No se pudo enviar el correo a '%s'. Error SMTP: %s";
   private static final String ERROR_SEND_FAILED = "La notificación por correo no pudo ser enviada.";
 
-  public EmailSenderException(final String message) {
+  private EmailSenderException(final String message) {
     super(message);
   }
 
-  public EmailSenderException(final String message, final Throwable cause) {
+  private EmailSenderException(final String message, final Throwable cause) {
     super(message, cause);
   }
 

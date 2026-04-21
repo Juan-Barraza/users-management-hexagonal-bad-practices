@@ -11,6 +11,7 @@ import lombok.extern.java.Log;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.Map;
 
 @Log
@@ -29,52 +30,25 @@ public final class EmailNotificationService {
   private final EmailSenderPort emailSenderPort;
 
   public void notifyUserCreated(final UserModel user, final String plainPassword) {
-    // Clean Code - Regla 25 (claridad sobre ingenio) y Regla 26 (evitar
-    // sobrecompactación):
-    // Se comprime toda la operación en una cadena de llamadas anidadas en una sola
-    // expresión.
-    // Aunque "funciona", sacrifica completamente la legibilidad.
-    // Clean Code - Regla 3 (un solo nivel de abstracción por función):
-    // Esta línea mezcla niveles de abstracción radicalmente distintos en una sola
-    // expresión:
-    // - Alto nivel: "notificar al usuario creado"
-    // - Medio nivel: buildDestination(), sendOrLog()
-    // - Bajo nivel: loadTemplate() (I/O de classpath), renderTemplate()
-    // (manipulación de Strings)
-    // La regla dice: dentro del mismo método no deben convivir reglas de negocio
-    // con detalles técnicos de I/O, parseo o formateo de texto.
-    // Clean Code - Regla 11 (evitar duplicación): la construcción de tokens del
-    // mapa
-    // es idéntica a la de notifyUserUpdated — debería centralizarse.
-    final Map<String, String> values = Map.of(
-        TOKEN_NAME, user.getName().value(),
-        TOKEN_EMAIL, user.getEmail().value(),
-        TOKEN_PASSWORD, plainPassword,
-        TOKEN_ROLE, user.getRole().name());
 
-    final String body = processTemplate("user-created.html", values);
+    final Map<String, String> model = createBaseModelMap(user);
+    model.put(TOKEN_PASSWORD, plainPassword);
 
-    final EmailDestinationModel destination = buildDestination(user, SUBJECT_CREATED, body);
-
-    sendEmail(destination);
+    sendNotification(user, SUBJECT_CREATED, "user-created.html", model);
   }
 
   public void notifyUserUpdated(final UserModel user) {
-    // Clean Code - Regla 11 (evitar duplicación): misma estructura que
-    // notifyUserCreated —  
-    // loadTemplate → renderTemplate → buildDestination → sendOrLog.
-    // Esta lógica de orquestación debería extraerse a un método genérico privado.
-    // Clean Code - Regla 25 y 26: misma sobrecompactación que arriba.
-    final Map<String, String> values = Map.of(
-        TOKEN_NAME, user.getName().value(),
-        TOKEN_EMAIL, user.getEmail().value(),
-        TOKEN_ROLE, user.getRole().name(),
-        TOKEN_STATUS, user.getStatus().name());
 
-    final String body = processTemplate("user-updated.html", values);
+    final Map<String, String> model = createBaseModelMap(user);
+    model.put(TOKEN_STATUS, user.getStatus().name());
 
-    final EmailDestinationModel destination = buildDestination(user, SUBJECT_UPDATED, body);
+    sendNotification(user, SUBJECT_UPDATED, "user-updated.html", model);
+  }
 
+  private void sendNotification(UserModel user,
+      String subject, String template, Map<String, String> values) {
+    String body = processTemplate(template, values);
+    EmailDestinationModel destination = buildDestination(user, subject, body);
     sendEmail(destination);
   }
 
@@ -116,12 +90,18 @@ public final class EmailNotificationService {
     return result;
   }
 
-  
   private void sendEmail(final EmailDestinationModel destination) {
     try {
       emailSenderPort.send(destination);
     } catch (final EmailSenderException senderException) {
       throw senderException;
     }
+  }
+
+  private Map<String, String> createBaseModelMap(UserModel user) {
+    return new HashMap<>(Map.of(
+        TOKEN_NAME, user.getName().value(),
+        TOKEN_EMAIL, user.getEmail().value(),
+        TOKEN_ROLE, user.getRole().name()));
   }
 }
