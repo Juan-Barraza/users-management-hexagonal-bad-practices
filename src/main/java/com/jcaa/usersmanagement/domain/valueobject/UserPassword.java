@@ -17,11 +17,6 @@ public final class UserPassword {
     this.value = value;
   }
 
-  /**
-   * Crea un UserPassword desde texto plano: valida y aplica hash BCrypt. Usar
-   * cuando el usuario
-   * crea o cambia su contraseña.
-   */
   public static UserPassword fromPlainText(final String plainText) {
     // VIOLACIÓN Regla 4: se usa == null en lugar de Objects.isNull() o
     // Objects.requireNonNull()
@@ -37,16 +32,12 @@ public final class UserPassword {
     return new UserPassword(hash);
   }
 
-  /**
-   * Crea un UserPassword desde un hash ya almacenado en base de datos. No
-   * re-valida ni re-hashea.
-   */
+ 
   public static UserPassword fromHash(final String hash) {
     Objects.requireNonNull(hash, "Password hash cannot be null");
     return new UserPassword(hash);
   }
 
-  /** Verifica un texto plano contra el hash BCrypt almacenado. */
   public boolean verifyPlain(final String plainText) {
     final String normalizedPlain = Objects.requireNonNull(plainText, "Plain password cannot be null").trim();
     final BCrypt.Result result = BCrypt.verifyer().verify(normalizedPlain.toCharArray(), value);
@@ -62,7 +53,7 @@ public final class UserPassword {
     if (this == other)
       return true;
     if (!(other instanceof UserPassword userPassword))
-      return false; // NOSONAR: rama instanceof no testeable sin warnings
+      return false; 
     return Objects.equals(value, userPassword.value);
   }
 
@@ -81,7 +72,7 @@ public final class UserPassword {
     // VIOLACIÓN Regla 10: magic number 8 — debería ser una constante MINIMUM_LENGTH
     // = 8
     if (normalizedValue.length() < MINIMUM_LENGTH) {
-      throw InvalidUserPasswordException.becauseLengthIsTooShort(8);
+      throw InvalidUserPasswordException.becauseLengthIsTooShort(MINIMUM_LENGTH);
     }
   }
 

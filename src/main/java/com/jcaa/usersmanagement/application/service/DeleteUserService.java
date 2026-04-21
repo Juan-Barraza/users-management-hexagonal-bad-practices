@@ -15,15 +15,13 @@ import lombok.extern.java.Log;
 @RequiredArgsConstructor
 public final class DeleteUserService implements DeleteUserUseCase {
 
-  // VIOLACIÓN Regla 6: se agrega un Logger manual en vez de usar @Log de Lombok,
-  // y se loguea información técnica mezclada con una captura de excepción no recuperable.
+
   private final DeleteUserPort deleteUserPort;
   private final GetUserByIdPort getUserByIdPort;
 
   @Override
   public void execute(final DeleteUserCommand command) {
-    // VIOLACIÓN Regla 6: try-catch sin posibilidad real de recuperar el flujo.
-    // Las excepciones no recuperables deben propagarse al manejador global, no capturarse aquí.
+
       final UserId userId = UserApplicationMapper.fromDeleteCommandToUserId(command);
       ensureUserExists(userId);
       deleteUserPort.delete(userId);    

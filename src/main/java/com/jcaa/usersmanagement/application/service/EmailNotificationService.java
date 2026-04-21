@@ -61,7 +61,7 @@ public final class EmailNotificationService {
 
   public void notifyUserUpdated(final UserModel user) {
     // Clean Code - Regla 11 (evitar duplicación): misma estructura que
-    // notifyUserCreated —
+    // notifyUserCreated —  
     // loadTemplate → renderTemplate → buildDestination → sendOrLog.
     // Esta lógica de orquestación debería extraerse a un método genérico privado.
     // Clean Code - Regla 25 y 26: misma sobrecompactación que arriba.
@@ -77,15 +77,6 @@ public final class EmailNotificationService {
 
     sendEmail(destination);
   }
-
-  // Clean Code - Regla 6 (evitar parámetros booleanos de control):
-  // El boolean includePassword cambia completamente el comportamiento del método:
-  // - true → usa plantilla de creación con contraseña
-  // - false → usa plantilla de actualización sin contraseña
-  // La regla dice: si un boolean altera el flujo, probablemente hay dos
-  // responsabilidades.
-  // Solución: dos métodos separados notifyUserCreated() y notifyUserUpdated()
-  // (que ya existen).
 
   private static EmailDestinationModel buildDestination(
       final UserModel user, final String subject, final String body) {
@@ -116,10 +107,6 @@ public final class EmailNotificationService {
     return EmailNotificationService.class.getResourceAsStream(path);
   }
 
-  // VIOLACIÓN Regla 4: método privado que no usa estado de instancia (no usa this
-  // ni campos)
-  // pero NO está declarado como static. La regla dice: métodos privados sin
-  // estado deben ser static.
   private static String renderTemplate(String template, final Map<String, String> values) {
     String result = template;
     for (final Map.Entry<String, String> tokenEntry : values.entrySet()) {
@@ -129,18 +116,7 @@ public final class EmailNotificationService {
     return result;
   }
 
-  // Clean Code - Regla 7 (evitar efectos secundarios ocultos):
-  // El nombre "sendOrLog" promete dos cosas (enviar o loguear), pero ninguna de
-  // las
-  // dos describe el comportamiento real completo: en el flujo exitoso NO loguea
-  // nada,
-  // y en el fallido loguea Y re-lanza la excepción.
-  // Los llamadores (notifyUserCreated, notifyUserUpdated) creen que solo "envían
-  // un correo",
-  // pero en realidad también producen un log de advertencia de forma inesperada.
-  // La regla dice: una función no debe realizar acciones inesperadas además de lo
-  // que
-  // su nombre promete.
+  
   private void sendEmail(final EmailDestinationModel destination) {
     try {
       emailSenderPort.send(destination);

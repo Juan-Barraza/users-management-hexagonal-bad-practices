@@ -26,13 +26,6 @@ public final class UpdateUserService implements UpdateUserUseCase {
 
   @Override
   public void execute(final UpdateUserCommand command) {
-    // Clean Code - Regla 8 (separar comandos y consultas — CQS):
-    // Este método MODIFICA estado (actualiza el usuario en base de datos)
-    // Y TAMBIÉN RETORNA el usuario actualizado (consulta).
-    // La regla dice: un método que modifica estado no debe presentarse como
-    // consulta.
-    // Solución: void execute(command) para el comando + UserModel
-    // getUpdatedUser(id) para la consulta.
 
     log.info("Actualizando usuario id=" + command.id());
 
@@ -45,21 +38,9 @@ public final class UpdateUserService implements UpdateUserUseCase {
     final UserModel userToUpdate = UserApplicationMapper.fromUpdateCommandToModel(command, current.getPassword());
     final UserModel updatedUser = updateUserPort.update(userToUpdate);
 
-    // Clean Code - Regla 6: parámetro booleano de control (boolean flag).
-    // La regla dice: no usar boolean flags para cambiar el comportamiento interno
-    // de un método.
-    // Si true/false altera el flujo, probablemente hay dos responsabilidades
-    // distintas.
-    // Solución: dos métodos separados updateUserAndNotify() y updateUserSilently().
     sendUpdateNotification(updatedUser);
   }
 
-  // Clean Code - Regla 6: método con dos modos de operar según el boolean — viola
-  // la regla.
-  // Clean Code - Regla 7: efecto secundario oculto — el nombre "notifyIfRequired"
-  // no indica
-  // que también hace logging cuando notify=false. El nombre es engañoso sobre sus
-  // efectos.
   private void sendUpdateNotification(final UserModel user) {
     emailNotificationService.notifyUserUpdated(user);
     log.info("Notificación de actualización enviada para usuario: " + user.getId().value());
@@ -72,24 +53,6 @@ public final class UpdateUserService implements UpdateUserUseCase {
   }
 
   private void ensureEmailIsNotTakenByAnotherUser(final UserEmail newEmail, final UserId ownerId) {
-    // Clean Code - Regla 17: condición booleana excesivamente larga y difícil de
-    // leer.
-    // La regla dice: extraer condiciones complejas a métodos con nombre
-    // significativo.
-    // Esta expresión llama al repositorio TRES VECES en la misma condición —
-    // ineficiente e ilegible.
-    // Clean Code - Regla 25 (preferir claridad sobre ingenio):
-    // El autor intentó ser exhaustivo en una sola expresión booleana, pero el
-    // resultado
-    // es incomprensible. Un lector no puede deducir la intención en pocos segundos.
-    // Clean Code - Regla 26 (evitar sobrecompactación):
-    // Se comprimen cuatro llamadas al repositorio y cinco comparaciones en un solo
-    // if.
-    // La brevedad no justifica sacrificar la intención.
-    // Clean Code - Regla 27 (código listo para leer, no solo para ejecutar):
-    // Sin explicación oral del autor es imposible determinar qué condición exacta
-    // se está evaluando ni por qué hay lógica redundante en la segunda mitad del
-    // OR.
     getUserByEmailPort.getByEmail(newEmail).ifPresent(userWithSameEmail -> {
       if (!userWithSameEmail.isSameUser(ownerId)) {
         throw UserAlreadyExistsException.becauseEmailAlreadyExists(newEmail.value());
